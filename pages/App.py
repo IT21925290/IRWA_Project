@@ -12,7 +12,7 @@ ratings  = pd.read_csv(r"C:\Users\nrhhe\Downloads\ml-25m\ml-25m\ratings_cleaned.
 movies = pd.read_csv(r"C:\Users\nrhhe\Downloads\ml-25m\ml-25m\movies.csv",low_memory=False)
 links = pd.read_csv(r"C:\Users\nrhhe\Downloads\ml-25m\ml-25m\links.csv",low_memory=False)
 
-api_key = ""
+api_key = "381a24ff761d56748f95b7e4e9b5a0c0"
 
 st.set_page_config(
     page_title="Movie Recommendation App",
@@ -22,13 +22,41 @@ st.set_page_config(
 
 st.header('Movie Recommender System', anchor=None,divider=True)
 
+########################################################################################
+split = movies['genres'].str.split('|', expand=True)
+unique_values = split[0].unique()
+
+
+def genre_filter(unique_values):
+    exclude_list=[]
+    exclude_list = st.multiselect("",unique_values)
+    return exclude_list
+
+
+
+# st.write(exclude_list)
+
+
+
+
+# if exclude_list:
+#     movies= movies[movies['genres'].str.contains('|'.join(exclude_list))] 
+#     st.write(movies)
+#     st.write("hello")
+# else:
+#     st.write(movies)
+
+# movies=movies
+########################################################################################
+
+
+
 #cleaning the titles to make getting the id easier 
 movies['title_cleaned'] = movies['title'].astype(str).apply(lambda x: re.sub("[^a-zA-Z0-9 ]", "", x))
 
 #creating a tfidf vectorizer to get the cosine similarity in the getid function
 vect = TfidfVectorizer(analyzer='word', ngram_range=(1, 2))
 movies_tfidf = vect.fit_transform(movies['title_cleaned'])
-
 
 #function to get inputed moivies id
 def getid(title):
@@ -44,9 +72,8 @@ def getid(title):
 
 
 #function to recommend movies
-
 @st.cache_data
-def recommend(movie_id):
+def recommend(movie_id,exclude_list):
     similar_users = ratings[(ratings["movieId"] == movie_id) & (ratings["rating"] > 4)]["userId"].unique()
     similar_user_recs = ratings[(ratings["userId"].isin(similar_users)) & (ratings["rating"] > 4)]["movieId"]
     similar_user_recs = similar_user_recs.value_counts() / len(similar_users)
@@ -59,7 +86,15 @@ def recommend(movie_id):
     
     rec_percentages["score"] = rec_percentages["similar"] / rec_percentages["all"]
     rec_percentages = rec_percentages.sort_values("score", ascending=False)
-    return rec_percentages.head(10).merge(movies, left_index=True, right_on="movieId")[["title", "genres","movieId"]]
+
+    combined=rec_percentages.merge(movies, left_index=True, right_on="movieId")[["title", "genres","movieId"]]
+
+
+    st.write(exclude_list)
+
+    exclude=combined[combined["genres"].str.contains('|'.join(exclude_list))] 
+    st.write(exclude)
+    return exclude.head(10)[["title", "genres","movieId"]]
 
 
 
@@ -79,14 +114,16 @@ def get_cover_img(movieId):
 with st.form(key='my_form'):
     movie_input=st.text_input("Enter a movie title:", key="recommend_input")
 
+    st.subheader("Select genres to exclude:")
+    exclude_list = genre_filter(unique_values)
 
     if st.form_submit_button(label='Recommend'):
 
         data_load_state = st.text('Loading data...') 
-
+        
         movie_id=getid(movie_input)
         movie_id = movie_id.iloc[0]["movieId"]  
-        r_movies=recommend(movie_id)
+        r_movies=recommend(movie_id,exclude_list)
 
         r_movies = pd.merge(r_movies, links, on='movieId', how='inner')
         st.divider()
@@ -100,9 +137,12 @@ with st.form(key='my_form'):
         
         for i in range(0,5):
             with cols[i]:
-                st.image(get_cover_img(png[i]), use_column_width=True)
-                st.write(titles[i])
-                st.write(genres[i])
+                if i < len(titles):
+                    st.image(get_cover_img(png[i]), use_column_width=True)
+                    st.write(titles[i])
+                    st.write(genres[i])
+                else:
+                    st.write("No movies to show")
     
         st.divider()
         col6,col7,col8,col9,col10 = st.columns(5)
@@ -110,40 +150,10 @@ with st.form(key='my_form'):
     
         for i in range(5,10):
             with cols2[i-5]:
-                st.image(get_cover_img(png[i]), use_column_width=True)
-                st.write(titles[i])
-                st.write(genres[i])
+                if i < len(titles):
+                    st.image(get_cover_img(png[i]), use_column_width=True)
+                    st.write(titles[i])
+                    st.write(genres[i])
+                else:
+                    st.write("No movies to show")
         data_load_state.text("✅ Here are your recommendations!")
-
-
-
-# st.image(get_cover_img(862), use_column_width=True)
-# movie_input=st.text_input("Enter a movie title:", key="recommend_input")
-
-
-# if st.button("Recommend"):
-    
-#     movie_id=getid(movie_input)
-#     movie_id = movie_id.iloc[0]["movieId"]  
-#     r_movies=recommend(movie_id)
-#     st.divider()
-
-#     titles=r_movies["title"].tolist()  
-#     genres=r_movies["genres"].tolist()
-
-#     col1,col2,col3,col4,col5 = st.columns(5)
-#     cols=[col1,col2,col3,col4,col5]
-    
-#     for i in range(0,5):
-#         with cols[i]:
-#             st.write(titles[i])
-#             st.write(genres[i])
-
-#     st.divider()
-#     col6,col7,col8,col9,col10 = st.columns(5)
-#     cols2=[col6,col7,col8,col9,col10]
-
-#     for i in range(5,10):
-#         with cols2[i-5]:
-#             st.write(titles[i])
-#             st.write(genres[i])
