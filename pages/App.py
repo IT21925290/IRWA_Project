@@ -22,7 +22,10 @@ st.set_page_config(
     layout="wide",
 )
 
-st.header('Movie Recommender System', anchor=None,divider=True)
+st.header('Movie Recommender System', anchor=None, divider=True)
+st.write(" ➣ Type In A Movie Title And Select The Genres You Want To Include To Get more personalized Recommendations.")
+st.write(" ➣ You can search without selecting any genres to get recommendations from all genres.")
+st.divider()
 
 #code to get the all the unique genres from the movies df to a list 
 split = movies['genres'].str.split('|', expand=True)
