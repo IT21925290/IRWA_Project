@@ -28,27 +28,9 @@ unique_values = split[0].unique()
 
 
 def genre_filter(unique_values):
-    exclude_list=[]
-    exclude_list = st.multiselect("",unique_values)
-    return exclude_list
-
-
-
-# st.write(exclude_list)
-
-
-
-
-# if exclude_list:
-#     movies= movies[movies['genres'].str.contains('|'.join(exclude_list))] 
-#     st.write(movies)
-#     st.write("hello")
-# else:
-#     st.write(movies)
-
-# movies=movies
-########################################################################################
-
+    include_list=[]
+    include_list = st.multiselect("",unique_values)
+    return include_list
 
 
 #cleaning the titles to make getting the id easier 
@@ -73,28 +55,29 @@ def getid(title):
 
 #function to recommend movies
 @st.cache_data
-def recommend(movie_id,exclude_list):
-    similar_users = ratings[(ratings["movieId"] == movie_id) & (ratings["rating"] > 4)]["userId"].unique()
-    similar_user_recs = ratings[(ratings["userId"].isin(similar_users)) & (ratings["rating"] > 4)]["movieId"]
-    similar_user_recs = similar_user_recs.value_counts() / len(similar_users)
+def recommend(movie_id,include_list):
 
-    similar_user_recs = similar_user_recs[similar_user_recs > .019]
-    all_users = ratings[(ratings["movieId"].isin(similar_user_recs.index)) & (ratings["rating"] > 4)]
-    all_user_recs = all_users["movieId"].value_counts() / len(all_users["userId"].unique())
-    rec_percentages = pd.concat([similar_user_recs, all_user_recs], axis=1)
-    rec_percentages.columns = ["similar", "all"]
+    users_alike = ratings[(ratings["movieId"] == movie_id) & (ratings["rating"] > 4)]["userId"].unique()
+    movies_alike = ratings[(ratings["userId"].isin(users_alike)) & (ratings["rating"] > 4)]["movieId"]
+    movies_alike = movies_alike.value_counts() / len(users_alike)
+
+    movies_alike = movies_alike[movies_alike > .019]
+    users_all = ratings[(ratings["movieId"].isin(movies_alike.index)) & (ratings["rating"] > 4)]
+    user_recom = users_all["movieId"].value_counts() / len(users_all["userId"].unique())
+    r_percentages = pd.concat([movies_alike, user_recom], axis=1)
+    r_percentages.columns = ["similar", "all"]
     
-    rec_percentages["score"] = rec_percentages["similar"] / rec_percentages["all"]
-    rec_percentages = rec_percentages.sort_values("score", ascending=False)
+    r_percentages["score"] = r_percentages["similar"] / r_percentages["all"]
+    r_percentages = r_percentages.sort_values("score", ascending=False)
+    
+    #combing with movies df to get the title and genres
+    combined=r_percentages.merge(movies, left_index=True, right_on="movieId")[["title", "genres","movieId"]]
 
-    combined=rec_percentages.merge(movies, left_index=True, right_on="movieId")[["title", "genres","movieId"]]
+    st.write(include_list)
 
-
-    st.write(exclude_list)
-
-    exclude=combined[combined["genres"].str.contains('|'.join(exclude_list))] 
-    st.write(exclude)
-    return exclude.head(10)[["title", "genres","movieId"]]
+    include=combined[combined["genres"].str.contains('|'.join(include_list))] 
+    st.write(include)
+    return include.head(10)[["title", "genres","movieId"]]
 
 
 
@@ -114,8 +97,8 @@ def get_cover_img(movieId):
 with st.form(key='my_form'):
     movie_input=st.text_input("Enter a movie title:", key="recommend_input")
 
-    st.subheader("Select genres to exclude:")
-    exclude_list = genre_filter(unique_values)
+    st.subheader("Select genres to include:")
+    include_list = genre_filter(unique_values)
 
     if st.form_submit_button(label='Recommend'):
 
@@ -123,7 +106,7 @@ with st.form(key='my_form'):
         
         movie_id=getid(movie_input)
         movie_id = movie_id.iloc[0]["movieId"]  
-        r_movies=recommend(movie_id,exclude_list)
+        r_movies=recommend(movie_id,include_list)
 
         r_movies = pd.merge(r_movies, links, on='movieId', how='inner')
         st.divider()
