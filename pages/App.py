@@ -95,7 +95,6 @@ def get_cover_img(movieId):
         return "https://via.placeholder.com/500x750.png?text=No+Poster+Available"
 
 
-
 #form to get input
 with st.form(key='my_form'):
 
