@@ -12,7 +12,7 @@ ratings  = pd.read_csv(r"C:\Users\nrhhe\Downloads\ml-25m\ml-25m\ratings_cleaned.
 movies = pd.read_csv(r"C:\Users\nrhhe\Downloads\ml-25m\ml-25m\movies.csv",low_memory=False)
 links = pd.read_csv(r"C:\Users\nrhhe\Downloads\ml-25m\ml-25m\links.csv",low_memory=False)
 
-api_key = "381a24ff761d56748f95b7e4e9b5a0c0"
+api_key = ""
 
 st.set_page_config(
     page_title="Movie Recommendation App",
