@@ -84,7 +84,6 @@ def get_movies(movie_id,include_list):
     return include.head(10)[["title", "genres","movieId"]]
 
 
-
 #function to get the cover image from the tmdb api
 def get_cover_img(movieId):
     response = requests.get(f'https://api.themoviedb.org/3/movie/{movieId}?api_key={api_key}')
@@ -94,7 +93,6 @@ def get_cover_img(movieId):
     else:
         #catch errors if no poster is available and display a placeholder image
         return "https://via.placeholder.com/500x750.png?text=No+Poster+Available"
-
 
 
 
