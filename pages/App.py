@@ -42,7 +42,6 @@ def getid(title):
     
     return movie_recommend
 
-
 #function to recommend movies
 
 @st.cache_data
