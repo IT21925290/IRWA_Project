@@ -55,7 +55,7 @@ def getid(title):
 
 #function to recommend movies
 @st.cache_data
-def recommend(movie_id,include_list):
+def get_movies(movie_id,include_list):
 
     users_alike = ratings[(ratings["movieId"] == movie_id) & (ratings["rating"] > 4)]["userId"].unique()
     movies_alike = ratings[(ratings["userId"].isin(users_alike)) & (ratings["rating"] > 4)]["movieId"]
@@ -106,7 +106,7 @@ with st.form(key='my_form'):
         
         movie_id=getid(movie_input)
         movie_id = movie_id.iloc[0]["movieId"]  
-        r_movies=recommend(movie_id,include_list)
+        r_movies=get_movies(movie_id,include_list)
 
         r_movies = pd.merge(r_movies, links, on='movieId', how='inner')
         st.divider()
