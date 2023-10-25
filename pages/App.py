@@ -109,7 +109,7 @@ with st.form(key='my_form'):
 
     if st.form_submit_button(label='Recommend'):
 
-        data_load_state = st.text('Loading data...') 
+        data_load_state = st.text('Loading data.....') 
         
         #getting the movie id from the getid function
         movie_id=getid(movie_input)
