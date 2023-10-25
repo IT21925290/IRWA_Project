@@ -15,7 +15,6 @@ links = pd.read_csv(r"C:\Users\nrhhe\Downloads\ml-25m\ml-25m\links.csv",low_memo
 #api key for the movie tmdb
 api_key = "381a24ff761d56748f95b7e4e9b5a0c0"#please use your own api key(plz dont missuse mine)
 
-
 st.set_page_config(
     page_title="Movie Recommendation App",
     page_icon="🍿",
@@ -37,7 +36,6 @@ def genre_filter(unique_values):
     include_list=[]
     include_list = st.multiselect("Select genres to include:",unique_values)
     return include_list
-
 
 #cleaning the titles to make getting the id easier 
 movies['title_cleaned'] = movies['title'].astype(str).apply(lambda x: re.sub("[^a-zA-Z0-9 ]", "", x))
@@ -104,7 +102,7 @@ def get_cover_img(movieId):
 with st.form(key='my_form'):
 
     #getting users input
-    movie_input=st.text_input("Enter a movie title:", key="recommend_input")
+    movie_input=st.text_input("Enter a movie title: ", key="recommend_input")
 
     #getting the genres to include
     include_list = genre_filter(unique_values)
