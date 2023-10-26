@@ -17,6 +17,7 @@ st_lottie(
             speed =1,
             reverse = False,
             loop = True
+        
         )
    
 
