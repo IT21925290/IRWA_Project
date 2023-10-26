@@ -13,7 +13,7 @@ movies = pd.read_csv(r"C:\Users\nrhhe\Downloads\ml-25m\ml-25m\movies.csv",low_me
 links = pd.read_csv(r"C:\Users\nrhhe\Downloads\ml-25m\ml-25m\links.csv",low_memory=False)
 
 #api key for the movie tmdb
-api_key = "381a24ff761d56748f95b7e4e9b5a0c0"#please use your own api key(plz dont missuse mine)
+api_key = ""#please use your own api key
 
 st.set_page_config(
     page_title="Movie Recommendation App",
